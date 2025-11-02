@@ -5,7 +5,7 @@ import sklearn.ensemble as ske
 import sklearn.model_selection as skm
 
 #ready data
-df = pd.read_csv(r"C:\Users\Sverr\Desktop\Datasets\PimaIndiansDiabetes\pimaindiansdiabetes.csv",
+df = pd.read_csv(r"PimaIndiansDiabetes\pimaindiansdiabetes.csv",
                 delimiter=",",
                 header = 0)
 

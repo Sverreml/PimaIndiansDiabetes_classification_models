@@ -6,7 +6,7 @@ import numpy as np
 
 #ready data
 df = pd.read_csv(
-    r"C:\Users\Sverr\Desktop\Datasets\PimaIndiansDiabetes\pimaindiansdiabetes.csv",
+    r"PimaIndiansDiabetes\pimaindiansdiabetes.csv",
     delimiter=",",
     header = 0
 )
