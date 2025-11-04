@@ -10,10 +10,11 @@ from sklearn.feature_selection import SequentialFeatureSelector
 # ready data
 #ready data
 df = pd.read_csv(
-    r"PimaIndiansDiabetes_classification_models\pimaindiansdiabetes.csv",
+    r"PimaIndiansDiabetes_classification_models\pimaindiansdiabetes2.csv",
     delimiter=",",
     header = 0
 )
+df.dropna(inplace=True)
 
 d = {"pos": 1, "neg": 0}
 df["diabetes"] = df["diabetes"].map(d)
@@ -49,6 +50,7 @@ final_gam = LogisticGAM()
 final_gam.gridsearch(X_train[selected_features].values, Y_train.values)
 final_gam.summary()
 
+#error
 train_errors = 1 - final_gam.accuracy(X_train[selected_features].values, Y_train.values)
 test_errors = 1 - final_gam.accuracy(X_test[selected_features].values, Y_test.values)
 print(f"Train misclassification error: {train_errors}")

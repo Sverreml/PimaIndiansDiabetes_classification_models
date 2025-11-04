@@ -5,9 +5,10 @@ import sklearn.ensemble as ske
 import sklearn.model_selection as skm
 
 #ready data
-df = pd.read_csv(r"PimaIndiansDiabetes_classification_models\pimaindiansdiabetes.csv",
+df = pd.read_csv(r"PimaIndiansDiabetes_classification_models\pimaindiansdiabetes2.csv",
                 delimiter=",",
                 header = 0)
+df.dropna(inplace=True)
 
 d = {"pos": 1, "neg": 0}
 df["diabetes"] = df["diabetes"].map(d)
@@ -16,8 +17,6 @@ X_data = df.drop(columns=["diabetes"])
 Y_data = df["diabetes"]
 
 X_train, X_test, Y_train, Y_test = skm.train_test_split(X_data, Y_data, random_state=0, test_size=0.33, stratify=Y_data)
-
-##########################################################################################
 
 #Decision tree model
 reg_tree = skt.DecisionTreeClassifier(random_state=0)
@@ -47,7 +46,6 @@ Y_test_pred = tree_model.predict(X_test)
 train_misclass = np.mean(Y_train_pred != Y_train)
 test_misclass = np.mean(Y_test_pred != Y_test)
 
-##########################################################################################
 
 #Bagged decision tree model
 bagged_tree_model = ske.BaggingClassifier(
@@ -60,8 +58,6 @@ Y_train_bagged_pred = bagged_tree_model.predict(X_train)
 Y_test_bagged_pred = bagged_tree_model.predict(X_test)
 bagged_train_misclass = np.mean(Y_train_bagged_pred != Y_train)
 bagged_test_misclass = np.mean(Y_test_bagged_pred != Y_test)
-
-##########################################################################################
 
 #Random forest model
 random_forest_model = ske.RandomForestClassifier(

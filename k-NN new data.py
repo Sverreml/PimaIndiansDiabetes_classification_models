@@ -7,10 +7,11 @@ from sklearn.preprocessing import StandardScaler
 
 #ready data
 df = pd.read_csv(
-    r"PimaIndiansDiabetes_classification_models\pimaindiansdiabetes.csv",
+    r"PimaIndiansDiabetes_classification_models\pimaindiansdiabetes2.csv",
     delimiter=",",
     header = 0
 )
+df.dropna(inplace=True)
 
 d = {"pos": 1, "neg": 0}
 df["diabetes"] = df["diabetes"].map(d)
@@ -96,7 +97,7 @@ plt.legend()
 plt.grid()
 plt.show()
 
-#errors
+#error
 print(f"Test error on test set with k={best_k_fold}: {np.mean(knn.fit(X_train, Y_train).predict(X_test) != Y_test)}")
 print(f"Test error on test set with k={best_k_loo}: {np.mean(knn.fit(X_train, Y_train).predict(X_test) != Y_test)}")
 print(f"train misclassification error with k={best_k_fold}: {np.mean(knn.fit(X_train, Y_train).predict(X_train) != Y_train)}")
