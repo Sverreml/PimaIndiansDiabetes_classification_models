@@ -3,11 +3,13 @@ import numpy as np
 import sklearn.tree as skt
 import sklearn.ensemble as ske
 import sklearn.model_selection as skm
+from sklearn.model_selection import StratifiedKFold
 
 #ready data
 df = pd.read_csv(r"PimaIndiansDiabetes_classification_models\pimaindiansdiabetes.csv",
                 delimiter=",",
                 header = 0)
+df.dropna(inplace=True)
 
 d = {"pos": 1, "neg": 0}
 df["diabetes"] = df["diabetes"].map(d)
@@ -17,67 +19,71 @@ Y_data = df["diabetes"]
 
 X_train, X_test, Y_train, Y_test = skm.train_test_split(X_data, Y_data, random_state=0, test_size=0.33, stratify=Y_data)
 
-##########################################################################################
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
 
-#Decision tree model
-reg_tree = skt.DecisionTreeClassifier(random_state=0)
-reg_tree.fit(X_train, Y_train)
+########################################################################################################################
 
-path = reg_tree.cost_complexity_pruning_path(X_train, Y_train)
-ccp_alphas, impurities = path.ccp_alphas, path.impurities
-trees = []
-for ccp_alpha in ccp_alphas:
-    clf = skt.DecisionTreeClassifier(random_state=42, ccp_alpha=ccp_alpha)
-    clf.fit(X_train, Y_train)
-    trees.append(clf)
+# Decision tree model 
+path = skt.DecisionTreeClassifier(random_state=0).cost_complexity_pruning_path(X_train, Y_train)
+alphas = path.ccp_alphas
+param_grid = {'ccp_alpha': alphas}
 
-
-print(f"Number of trees built: {len(trees)}")
-
-
-train_scores = [t.score(X_train, Y_train) for t in trees]
-test_scores = [t.score(X_test, Y_test) for t in trees]
-
-best_alpha = ccp_alphas[np.argmax(test_scores)]
-
-tree_model = skt.DecisionTreeClassifier(random_state=0, ccp_alpha=best_alpha)
-tree_model.fit(X_train, Y_train)
-Y_train_pred = tree_model.predict(X_train)
-Y_test_pred = tree_model.predict(X_test)
-train_misclass = np.mean(Y_train_pred != Y_train)
-test_misclass = np.mean(Y_test_pred != Y_test)
-
-##########################################################################################
-
-#Bagged decision tree model
-bagged_tree_model = ske.BaggingClassifier(
-    estimator=skt.DecisionTreeClassifier(),
-    n_estimators=100,
-    random_state=0
+grid_tree = skm.GridSearchCV(
+    skt.DecisionTreeClassifier(random_state=0),
+    param_grid,
+    cv=cv
 )
-bagged_tree_model.fit(X_train, Y_train)
+grid_tree.fit(X_train, Y_train)
+
+tree_model = grid_tree.best_estimator_
+Y_train_tree_pred = tree_model.predict(X_train)    
+Y_test_tree_pred = tree_model.predict(X_test)
+tree_train_misclass = np.mean(Y_train_tree_pred != Y_train)
+tree_test_misclass = np.mean(Y_test_tree_pred != Y_test)
+
+########################################################################################################################
+
+# Bagged decision tree model
+param_grid = {'estimator__ccp_alpha': alphas}
+
+grid_bag = skm.GridSearchCV(
+    ske.BaggingClassifier(estimator=skt.DecisionTreeClassifier(random_state=0), n_estimators=100, random_state=0),
+    param_grid,
+    cv=cv
+)
+grid_bag.fit(X_train, Y_train)
+
+bagged_tree_model = grid_bag.best_estimator_
 Y_train_bagged_pred = bagged_tree_model.predict(X_train)    
 Y_test_bagged_pred = bagged_tree_model.predict(X_test)
 bagged_train_misclass = np.mean(Y_train_bagged_pred != Y_train)
 bagged_test_misclass = np.mean(Y_test_bagged_pred != Y_test)
 
-##########################################################################################
+########################################################################################################################
 
-#Random forest model
-random_forest_model = ske.RandomForestClassifier(
-    n_estimators=100,
-    random_state=0
+# Random Forest model
+param_grid = {
+    'ccp_alpha': [0.0, 0.001, 0.005, 0.01],
+    'max_depth': [None, 5, 10],
+    'min_samples_leaf': [1, 5, 10]
+}
+grid_rf = skm.GridSearchCV(
+    ske.RandomForestClassifier(n_estimators=200, random_state=42),
+    param_grid,
+    cv=cv
 )
-random_forest_model.fit(X_train, Y_train)
+grid_rf.fit(X_train, Y_train)
+
+
+random_forest_model = grid_rf.best_estimator_
 Y_train_rf_pred = random_forest_model.predict(X_train)
 Y_test_rf_pred = random_forest_model.predict(X_test)
 rf_train_misclass = np.mean(Y_train_rf_pred != Y_train)
 rf_test_misclass = np.mean(Y_test_rf_pred != Y_test)
 
-
-print("Decision Tree Training Misclassification Error: {:.4f}".format(train_misclass))
-print("Decision Tree Test Misclassification Error: {:.4f}".format(test_misclass))
-print("Bagged Decision Tree Training Misclassification Error: {:.4f}".format(bagged_train_misclass))
-print("Bagged Decision Tree Test Misclassification Error: {:.4f}".format(bagged_test_misclass))
-print("Random Forest Training Misclassification Error: {:.4f}".format(rf_train_misclass))
-print("Random Forest Test Misclassification Error: {:.4f}".format(rf_test_misclass))
+print(f"Decision Tree Train Misclassification Error: {tree_train_misclass:.4f}")
+print(f"Decision Tree Test Misclassification Error: {tree_test_misclass:.4f}")
+print(f"Bagged Tree Train Misclassification Error: {bagged_train_misclass:.4f}")
+print(f"Bagged Tree Test Misclassification Error: {bagged_test_misclass:.4f}")
+print(f"Random Forest Train Misclassification Error: {rf_train_misclass:.4f}")
+print(f"Random Forest Test Misclassification Error: {rf_test_misclass:.4f}")

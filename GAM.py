@@ -31,12 +31,16 @@ base_gam = LogisticGAM(s(0) + s(1) + s(2) + s(3) + s(4) + s(5) + s(6) + s(7))
 base_gam.fit(X_train, Y_train)
 base_gam.summary()
 
+#Fit feature selection
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
 
 sfs = SequentialFeatureSelector(
     base_gam,
     n_features_to_select="auto",      
     direction="backward",             
     scoring="accuracy",
+    cv=cv,
     n_jobs=-1
 )
 
@@ -51,5 +55,5 @@ final_gam.summary()
 
 train_errors = 1 - final_gam.accuracy(X_train[selected_features].values, Y_train.values)
 test_errors = 1 - final_gam.accuracy(X_test[selected_features].values, Y_test.values)
-print(f"Train misclassification error: {train_errors}")
-print(f"Test misclassification error: {test_errors}")
+print(f"Train misclassification error: {train_errors:.4f}")
+print(f"Test misclassification error: {test_errors:.4f}")
