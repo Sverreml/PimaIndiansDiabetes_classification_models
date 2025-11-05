@@ -57,3 +57,13 @@ train_errors = 1 - final_gam.accuracy(X_train[selected_features].values, Y_train
 test_errors = 1 - final_gam.accuracy(X_test[selected_features].values, Y_test.values)
 print(f"Train misclassification error: {train_errors:.4f}")
 print(f"Test misclassification error: {test_errors:.4f}")
+
+#confusion matrix
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+Y_test_pred = final_gam.predict(X_test[selected_features].values)
+cm = confusion_matrix(Y_test, Y_test_pred)
+print("Confusion Matrix:\n", cm)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels={0: 'neg', 1: 'pos'})
+disp.plot(cmap=plt.cm.Blues)
+plt.title("GAM Confusion Matrix")
+plt.show()

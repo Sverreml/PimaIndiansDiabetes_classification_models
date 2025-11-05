@@ -87,3 +87,12 @@ print(f"Bagged Tree Train Misclassification Error: {bagged_train_misclass:.4f}")
 print(f"Bagged Tree Test Misclassification Error: {bagged_test_misclass:.4f}")
 print(f"Random Forest Train Misclassification Error: {rf_train_misclass:.4f}")
 print(f"Random Forest Test Misclassification Error: {rf_test_misclass:.4f}")
+
+#confusion matrices
+from sklearn.metrics import confusion_matrix
+tree_cm = confusion_matrix(Y_test, Y_test_tree_pred)
+bagged_cm = confusion_matrix(Y_test, Y_test_bagged_pred)
+rf_cm = confusion_matrix(Y_test, Y_test_rf_pred)
+print("Decision Tree Confusion Matrix:\n", tree_cm)
+print("Bagged Tree Confusion Matrix:\n", bagged_cm)
+print("Random Forest Confusion Matrix:\n", rf_cm)

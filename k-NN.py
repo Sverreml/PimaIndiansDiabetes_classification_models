@@ -101,3 +101,9 @@ print(f"Test error on test set with k={best_k_fold}: {np.mean(knn.fit(X_train, Y
 print(f"Test error on test set with k={best_k_loo}: {np.mean(knn.fit(X_train, Y_train).predict(X_test) != Y_test)}")
 print(f"train misclassification error with k={best_k_fold}: {np.mean(knn.fit(X_train, Y_train).predict(X_train) != Y_train)}")
 print(f"train misclassification error with k={best_k_loo}: {np.mean(knn.fit(X_train, Y_train).predict(X_train) != Y_train)}")
+
+#confusion matrix
+from sklearn.metrics import confusion_matrix
+Y_test_pred = knn.fit(X_train, Y_train).predict(X_test)
+cm = confusion_matrix(Y_test, Y_test_pred)
+print("Confusion Matrix:\n", cm)
